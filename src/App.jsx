@@ -15,6 +15,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import UserProfileDropdown from './components/UserProfileDropdown';
+import Header from './components/Header';
 
 const navLinks = [
   { to: '/', label: 'Dashboard' },
@@ -31,8 +32,19 @@ const navLinks = [
 
 function UserLayout() {
   const location = useLocation();
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isMobile = window.innerWidth <= 900;
+  const [sidebarOpen, setSidebarOpen] = useState(() => !isMobile ? true : false);
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 900) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const { userData, logoutUser } = useUser();
   // Get current page name
   const currentPage = navLinks.find(l => l.to === location.pathname)?.label || 'Dashboard';
@@ -40,7 +52,7 @@ function UserLayout() {
   return (
     <div className="flex">
       {/* Modern Sidebar */}
-      <aside className={`sidebar ${!sidebarOpen ? 'sidebar-closed' : ''}`}>
+      <aside className={`sidebar${sidebarOpen && isMobile ? ' open' : ''}${!sidebarOpen ? ' sidebar-closed' : ''}`}> 
         <div className="sidebar-header">
           <div className="sidebar-title">
             <span>Smart Health</span>
@@ -60,6 +72,7 @@ function UserLayout() {
                 <Link 
                   to={link.to} 
                   className={`nav-link ${location.pathname === link.to ? 'active' : ''}`}
+                  onClick={() => { if (isMobile) setSidebarOpen(false); }}
                 >
                   <span className="nav-icon">
                     {/* You can add icons here later */}
@@ -72,29 +85,29 @@ function UserLayout() {
           </ul>
         </nav>
       </aside>
+      {/* Sidebar overlay for mobile */}
+      {sidebarOpen && isMobile && (
+        <div className="sidebar-overlay blur-overlay" onClick={() => setSidebarOpen(false)}></div>
+      )}
       
       {/* Main content area */}
       <div className="flex-1 flex flex-col items-center justify-start min-h-screen">
-        {/* Modern Header */}
-        <header className={`header ${!sidebarOpen ? 'w-full ml-0' : ''}`} style={{marginLeft: sidebarOpen ? 260 : 0, width: `calc(100vw - ${sidebarOpen ? 260 : 0}px)`, maxWidth: `calc(100vw - ${sidebarOpen ? 260 : 0}px)`}}>
-          <div className="flex items-center gap-4">
-            {!sidebarOpen && (
-              <button 
-                className="sidebar-toggle-btn"
-                onClick={() => setSidebarOpen(true)}
-                title="Open Sidebar"
-              >
-                ☰
-              </button>
-            )}
-            <div className="page-title">{currentPage}</div>
-          </div>
-          <div className="header-actions">
-            <UserProfileDropdown user={userData.profile} onLogout={logoutUser} />
-          </div>
-        </header>
+        {/* Modern Header using shared Header component */}
+        <Header
+          title={currentPage}
+          onHamburgerClick={() => setSidebarOpen(true)}
+          showHamburger={!sidebarOpen}
+          user={{ ...userData.profile, onLogout: logoutUser }}
+        />
         {/* Main Content with blurred dark background */}
-        <div className="main-bg-blur-dark" style={{width: `calc(100vw - ${sidebarOpen ? 260 : 0}px)`, maxWidth: `calc(100vw - ${sidebarOpen ? 260 : 0}px)`, minHeight: 'calc(100vh - 70px)', marginLeft: sidebarOpen ? 260 : 0}}>
+        <div
+          className="main-bg-blur-dark"
+          style={{
+            width: sidebarOpen && !isMobile ? 'calc(100vw - 260px)' : '100vw',
+            maxWidth: sidebarOpen && !isMobile ? 'calc(100vw - 260px)' : '100vw',
+            minHeight: 'calc(100vh - 70px)',
+            marginLeft: sidebarOpen && !isMobile ? 260 : 0
+          }}>
           <main className="main-content flex flex-col items-center justify-center w-full" style={{marginLeft: 0, width: '100%', maxWidth: '100%', background: 'none'}}>
             <div className="content-wrapper animate-slideInUp" style={{margin: 0, width: '100%', maxWidth: '100%', minWidth: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
               <Outlet />

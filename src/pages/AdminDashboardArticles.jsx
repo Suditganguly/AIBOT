@@ -23,7 +23,7 @@ const AdminDashboardArticles = ({ articles, articlesLoading, editingArticle, art
 
   return (
     <div className="animate-slideInUp w-full max-w-7xl mx-auto px-2 md:px-6 py-4">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-2">
         <h2 className="text-2xl font-bold text-primary">Blog Articles</h2>
         <button 
           onClick={onRefresh} 

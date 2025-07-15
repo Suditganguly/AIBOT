@@ -16,7 +16,7 @@ const AdminDashboardUsers = ({ users, usersLoading, editingUser, userEdit, setUs
 
   return (
     <div className="animate-slideInUp w-full max-w-7xl mx-auto px-2 md:px-6 py-4">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-2">
         <h2 className="text-2xl font-bold text-primary">All Users</h2>
         <button 
           onClick={onRefresh}
@@ -127,9 +127,8 @@ const AdminDashboardUsers = ({ users, usersLoading, editingUser, userEdit, setUs
       </div>
 
       {/* Users Table */}
-      <div className="card glass-card">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+      <div className="card glass-card overflow-x-auto">
+        <table className="w-full text-sm min-w-[600px] responsive-table">
             <thead>
               <tr className="bg-neutral-900 bg-opacity-60 text-white">
                 <th className="p-3 font-semibold">Name</th>
@@ -161,17 +160,17 @@ const AdminDashboardUsers = ({ users, usersLoading, editingUser, userEdit, setUs
                 </tr>
               ) : (
                 filteredUsers.map(user => (
-                <tr key={user.email} className="border-b border-neutral-800 hover:bg-neutral-800 hover:bg-opacity-40 transition-all">
-                  <td className="p-3">
+                <tr key={user.email || user.id || Math.random()} className="border-b border-neutral-800 hover:bg-neutral-800 hover:bg-opacity-40 transition-all">
+                  <td className="p-3" data-label="Name">
                     {editingUser === user.email ? (
                       <input
                         value={userEdit.name}
                         onChange={e => setUserEdit({ ...userEdit, name: e.target.value })}
                         className="input-dark"
                       />
-                    ) : user.name}
+                    ) : (user.name || '-')}
                   </td>
-                  <td className="p-3">
+                  <td className="p-3" data-label="Email">
                     {editingUser === user.email ? (
                       <input
                         value={userEdit.email}
@@ -179,12 +178,12 @@ const AdminDashboardUsers = ({ users, usersLoading, editingUser, userEdit, setUs
                         className="input-dark"
                         disabled
                       />
-                    ) : user.email}
+                    ) : (user.email || '-')}
                   </td>
-                  <td className="p-3 text-center">
-                    <span className="badge badge-info bg-opacity-80">{user.reminders || 0}</span>
+                  <td className="p-3 text-center" data-label="Reminders">
+                    <span className="badge badge-info bg-opacity-80">{user.reminders != null ? user.reminders : 0}</span>
                   </td>
-                  <td className="p-3 text-center">
+                  <td className="p-3 text-center" data-label="Role">
                     {editingUser === user.email ? (
                       <select
                         value={userEdit.role}
@@ -196,11 +195,11 @@ const AdminDashboardUsers = ({ users, usersLoading, editingUser, userEdit, setUs
                       </select>
                     ) : (
                       <span className={`badge ${user.role === 'admin' ? 'badge-warning' : 'badge-secondary'} bg-opacity-80`}>
-                        {user.role}
+                        {user.role || '-'}
                       </span>
                     )}
                   </td>
-                  <td className="p-3 text-center">
+                  <td className="p-3 text-center" data-label="Status">
                     {editingUser === user.email ? (
                       <select
                         value={userEdit.status}
@@ -212,43 +211,37 @@ const AdminDashboardUsers = ({ users, usersLoading, editingUser, userEdit, setUs
                       </select>
                     ) : (
                       <span className={`badge ${user.status === 'active' ? 'badge-success' : 'badge-error'} bg-opacity-80`}>
-                        {user.status}
+                        {user.status || '-'}
                       </span>
                     )}
                   </td>
-                  <td className="p-3 text-center">
-                    <span className={`badge ${
-                      user.healthScore >= 80 ? 'badge-success' : 
-                      user.healthScore >= 60 ? 'badge-warning' : 'badge-error'
-                    } bg-opacity-80`}>
-                      {user.healthScore}/100
-                    </span>
+                  <td className="p-3 text-center" data-label="Health Score">
+                    <span className="badge badge-secondary bg-opacity-80">{user.healthScore != null ? user.healthScore : 0}</span>
                   </td>
-                  <td className="p-3 text-center">
-                    {user.registered ? new Date(user.registered).toLocaleDateString() : '-'}
+                  <td className="p-3 text-center" data-label="Registered">
+                    <span className="text-xs text-neutral-400">{user.registered ? (new Date(user.registered).toLocaleDateString() || '-') : '-'}</span>
                   </td>
-                  <td className="p-3 text-center">
-                    {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : '-'}
+                  <td className="p-3 text-center" data-label="Last Login">
+                    <span className="text-xs text-neutral-400">{user.lastLogin ? (new Date(user.lastLogin).toLocaleDateString() || '-') : '-'}</span>
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 text-center" data-label="Actions">
                     {editingUser === user.email ? (
                       <div className="flex gap-2">
-                        <button onClick={() => saveEditUser(user.email)} className="btn btn-primary btn-xs">Save</button>
-                        <button onClick={() => setEditingUser(null)} className="btn btn-ghost btn-xs">Cancel</button>
+                        <button onClick={() => saveEditUser(user.email)} className="btn btn-primary btn-sm">Save</button>
+                        <button onClick={() => setEditingUser(null)} className="btn btn-ghost btn-sm">Cancel</button>
                       </div>
                     ) : (
                       <div className="flex gap-2">
-                        <button onClick={() => startEditUser(user)} className="btn btn-outline btn-xs">Edit</button>
-                        <button onClick={() => deleteUser(user.email)} className="btn bg-error text-white btn-xs">Delete</button>
+                        <button onClick={() => startEditUser(user)} className="btn btn-outline btn-sm">Edit</button>
+                        <button onClick={() => deleteUser(user.email)} className="btn bg-error text-white btn-sm">Delete</button>
                       </div>
                     )}
                   </td>
                 </tr>
-                ))
-              )}
+              ))
+            )}
             </tbody>
-          </table>
-        </div>
+        </table>
       </div>
     </div>
   );

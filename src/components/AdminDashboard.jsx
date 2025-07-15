@@ -6,6 +6,8 @@ import AdminDashboardArticles from '../pages/AdminDashboardArticles';
 import AdminDashboardDoctors from '../pages/AdminDashboardDoctors';
 import AdminDashboardAnalytics from '../pages/AdminDashboardAnalytics';
 import UserProfileDropdown from './UserProfileDropdown';
+import Header from './Header';
+import './AdminDashboard.css';
 
 const admin = { name: 'Admin', email: 'admin@health.com', role: 'Super Admin' };
 
@@ -26,6 +28,8 @@ const sectionNames = {
 const AdminDashboard = () => {
   const [section, setSection] = useState('dashboard');
   const [profileOpen, setProfileOpen] = useState(false);
+  const isMobile = window.innerWidth <= 900;
+  const [sidebarOpen, setSidebarOpen] = useState(() => !isMobile ? true : false);
   const { userData, isAuthenticated, logoutUser } = useUser();
   
   // Get centralized data from UserContext
@@ -96,6 +100,18 @@ const AdminDashboard = () => {
     handleLoadUsers();
     handleLoadArticles();
   }, [handleLoadUsers, handleLoadArticles]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 900) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // User management handlers
   const startEditUser = (user) => {
@@ -236,15 +252,32 @@ const AdminDashboard = () => {
   if (!isAuthenticated || userData?.profile?.email !== 'admin@health.com') {
     return <div className="flex items-center justify-center min-h-screen text-xl text-red-600">Access Denied: Admin Only</div>;
   }
-
+  // Sidebar class logic
+  const sidebarClass = `sidebar${sidebarOpen && isMobile ? ' open' : ''}${!sidebarOpen ? ' sidebar-closed' : ''}`;
+  // Main content style logic
+  const mainContentStyle = {
+    width: sidebarOpen && !isMobile ? 'calc(100vw - 260px)' : '100vw',
+    maxWidth: sidebarOpen && !isMobile ? 'calc(100vw - 260px)' : '100vw',
+    minHeight: 'calc(100vh - 70px)',
+    marginLeft: sidebarOpen && !isMobile ? 260 : 0
+  };
   return (
-    <div className="flex min-h-screen">
+    <div className="flex">
       {/* Sidebar */}
-      <aside className="sidebar">
+      <aside className={sidebarClass}>
         <div className="sidebar-header">
           <div className="sidebar-title">
             <span>Smart Health Admin</span>
           </div>
+          {isMobile && (
+            <button 
+              className="sidebar-close-btn"
+              onClick={() => setSidebarOpen(false)}
+              title="Close Sidebar"
+            >
+              ✕
+            </button>
+          )}
         </div>
         <nav className="sidebar-nav">
           <ul className="list">
@@ -252,7 +285,7 @@ const AdminDashboard = () => {
               <li key={key} className="nav-item">
                 <a 
                   className={`nav-link ${section === key ? 'active' : ''}`}
-                  onClick={() => setSection(key)}
+                  onClick={() => { setSection(key); if (isMobile) setSidebarOpen(false); }}
                   style={{ cursor: 'pointer' }}
                 >
                   <span className="nav-icon">
@@ -265,19 +298,21 @@ const AdminDashboard = () => {
           </ul>
         </nav>
       </aside>
-      
+      {/* Sidebar overlay for mobile */}
+      {sidebarOpen && isMobile && (
+        <div className="sidebar-overlay blur-overlay" onClick={() => setSidebarOpen(false)}></div>
+      )}
       {/* Main content area */}
       <div className="flex-1 flex flex-col items-center justify-start min-h-screen">
         {/* Modern Header */}
-        <header className="header" style={{marginLeft: 260, width: 'calc(100vw - 260px)', maxWidth: 'calc(100vw - 260px)'}}>
-          <div className="page-title">{sectionNames[section]}</div>
-          <div className="header-actions">
-            <UserProfileDropdown user={userData.profile} onLogout={logoutUser} />
-          </div>
-        </header>
-        
+        <Header
+          title={sectionNames[section]}
+          onHamburgerClick={() => setSidebarOpen(true)}
+          showHamburger={!sidebarOpen}
+          user={{ ...userData.profile, onLogout: logoutUser }}
+        />
         {/* Main Content with blurred dark background */}
-        <div className="main-bg-blur-dark" style={{width: 'calc(100vw - 260px)', maxWidth: 'calc(100vw - 260px)', minHeight: 'calc(100vh - 70px)', marginLeft: 260}}>
+        <div className="main-bg-blur-dark" style={mainContentStyle}>
           <main className="main-content flex flex-col items-center justify-center w-full" style={{marginLeft: 0, width: '100%', maxWidth: '100%', background: 'none'}}>
             <div className="content-wrapper animate-slideInUp" style={{margin: 0, width: '100%', maxWidth: '100%', minWidth: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
               {section === 'dashboard' && (

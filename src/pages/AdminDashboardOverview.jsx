@@ -1,42 +1,22 @@
 import React from 'react';
 
 const AdminDashboardOverview = ({ summaryCards, analytics, recentActivity }) => (
-  <div style={{ width: '100%', maxWidth: 1100 }}>
+  <div className="dashboard-content-wrapper w-full max-w-5xl mx-auto px-2 md:px-6 py-4">
     <h2 className="text-2xl font-bold text-primary mb-6">Overview</h2>
-    <div
-      className="overview-grid"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '32px',
-        marginBottom: '36px',
-        width: '100%',
-        justifyItems: 'center',
-        alignItems: 'stretch',
-      }}
-    >
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
       {summaryCards.map((card, idx) => (
         <div
           key={idx}
-          className="card card-stat animate-slideInUp"
-          style={{
-            animationDelay: `${0.1 * idx}s`,
-            minWidth: 0,
-            width: '100%',
-            maxWidth: '240px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          className="card card-stat animate-slideInUp flex flex-col items-center justify-center"
+          style={{ animationDelay: `${0.1 * idx}s` }}
         >
           <div className="stat-value">{card.value}</div>
           <div className="stat-label">{card.label}</div>
         </div>
       ))}
     </div>
-    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px', marginBottom: 32 }}>
-      <div className="card card-accent animate-slideInUp" style={{animationDelay: '0.5s', width: '100%'}}>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="card card-accent animate-slideInUp md:col-span-2" style={{animationDelay: '0.5s'}}>
         <div className="card-header">
           <h3 className="card-title">Recent Activity</h3>
         </div>
@@ -46,48 +26,48 @@ const AdminDashboardOverview = ({ summaryCards, analytics, recentActivity }) => 
           ))}
         </ul>
       </div>
-      <div className="card animate-slideInUp" style={{animationDelay: '0.6s', width: '100%'}}>
+      <div className="card animate-slideInUp" style={{animationDelay: '0.6s'}}>
         <div className="card-header">
           <h3 className="card-title">System Health</h3>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div className="flex flex-col gap-3">
+          <div className="flex justify-between">
             <span>Server Status</span>
             <span className="badge badge-success">{analytics?.systemHealth?.serverStatus || 'Online'}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className="flex justify-between">
             <span>API Response</span>
             <span className="badge badge-primary">{analytics?.systemHealth?.apiResponse || '120ms'}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className="flex justify-between">
             <span>Database</span>
             <span className="badge badge-success">{analytics?.systemHealth?.database || 'Connected'}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className="flex justify-between">
             <span>Storage Used</span>
             <span className="badge badge-warning">{analytics?.systemHealth?.storageUsed || '68%'}</span>
           </div>
         </div>
       </div>
     </div>
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-      <div className="card animate-slideInUp" style={{animationDelay: '0.7s', width: '100%'}}>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="card animate-slideInUp" style={{animationDelay: '0.7s'}}>
         <div className="card-header">
           <h3 className="card-title">Active Users</h3>
         </div>
-        <div style={{ fontSize: 32, fontWeight: 700, color: '#2563eb', marginBottom: 8 }}>
+        <div className="text-3xl font-bold text-blue-600 mb-2">
           {analytics?.activeUsers || 0}
         </div>
-        <div style={{ color: '#4b5563', fontSize: 16 }}>Users active in the last 24 hours</div>
+        <div className="text-gray-500 text-base">Users active in the last 24 hours</div>
       </div>
-      <div className="card animate-slideInUp" style={{animationDelay: '0.8s', width: '100%'}}>
+      <div className="card animate-slideInUp" style={{animationDelay: '0.8s'}}>
         <div className="card-header">
           <h3 className="card-title">User Growth</h3>
         </div>
-        <div style={{ fontSize: 32, fontWeight: 700, color: '#10b981', marginBottom: 8 }}>
+        <div className="text-3xl font-bold text-green-500 mb-2">
           +{analytics?.userGrowthRate || 0}%
         </div>
-        <div style={{ color: '#4b5563', fontSize: 16 }}>Growth in the last 30 days</div>
+        <div className="text-gray-500 text-base">Growth in the last 30 days</div>
       </div>
     </div>
   </div>

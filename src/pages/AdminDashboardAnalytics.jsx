@@ -35,11 +35,11 @@ const AdminDashboardAnalytics = () => {
   const userActivityRate = users.length ? Math.round((activeUsers / users.length) * 100) : 0;
 
   return (
-    <div className="animate-slideInUp" style={{ width: '100%', maxWidth: 1100 }}>
+    <div className="animate-slideInUp w-full max-w-5xl mx-auto px-2 md:px-6 py-4">
       <h2 className="text-2xl font-bold text-primary mb-6">Analytics Dashboard</h2>
       
       {/* System Overview Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '32px', marginBottom: 36 }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="card card-stat animate-slideInUp" style={{animationDelay: '0.1s'}}>
           <div className="stat-value">{analytics?.totalUsers || users.length}</div>
           <div className="stat-label">Total Users</div>
@@ -59,8 +59,8 @@ const AdminDashboardAnalytics = () => {
       </div>
 
       {/* User Health Analytics */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px', marginBottom: 32 }}>
-        <div className="card glass-card animate-slideInUp" style={{animationDelay: '0.5s', width: '100%'}}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="card glass-card animate-slideInUp md:col-span-2" style={{animationDelay: '0.5s'}}>
           <div className="card-header">
             <h3 className="card-title">User Health Analytics</h3>
           </div>
@@ -103,7 +103,7 @@ const AdminDashboardAnalytics = () => {
             </div>
           </div>
         </div>
-        <div className="card animate-slideInUp" style={{animationDelay: '0.6s', width: '100%'}}>
+        <div className="card animate-slideInUp" style={{animationDelay: '0.6s'}}>
           <div className="card-header">
             <h3 className="card-title">User Activity Status</h3>
           </div>
@@ -119,8 +119,8 @@ const AdminDashboardAnalytics = () => {
       </div>
 
       {/* Health Trends and Insights */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: 32 }}>
-        <div className="card animate-slideInUp" style={{animationDelay: '0.7s', width: '100%'}}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="card animate-slideInUp" style={{animationDelay: '0.7s'}}>
           <div className="card-header">
             <h3 className="card-title">Health Score Trend</h3>
           </div>
@@ -149,7 +149,7 @@ const AdminDashboardAnalytics = () => {
             </div>
           </div>
         </div>
-        <div className="card animate-slideInUp" style={{animationDelay: '0.8s', width: '100%'}}>
+        <div className="card animate-slideInUp" style={{animationDelay: '0.8s'}}>
           <div className="card-header">
             <h3 className="card-title">Mood & Wellness</h3>
           </div>
@@ -179,7 +179,7 @@ const AdminDashboardAnalytics = () => {
       </div>
 
       {/* User Insights and Recommendations */}
-      <div className="card animate-slideInUp" style={{animationDelay: '0.9s', width: '100%', marginBottom: 32 }}>
+      <div className="card animate-slideInUp mb-8" style={{animationDelay: '0.9s'}}>
         <div className="card-header">
           <h3 className="card-title">User Health Insights & Recommendations</h3>
         </div>
@@ -213,8 +213,8 @@ const AdminDashboardAnalytics = () => {
       </div>
 
       {/* System Analytics */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-        <div className="card animate-slideInUp" style={{animationDelay: '1.0s', width: '100%'}}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="card animate-slideInUp" style={{animationDelay: '1.0s'}}>
           <div className="card-header">
             <h3 className="card-title">User Growth</h3>
           </div>
@@ -223,7 +223,7 @@ const AdminDashboardAnalytics = () => {
           </div>
           <div style={{ color: '#4b5563', fontSize: 16 }}>Growth in the last 30 days</div>
         </div>
-        <div className="card animate-slideInUp" style={{animationDelay: '1.1s', width: '100%'}}>
+        <div className="card animate-slideInUp" style={{animationDelay: '1.1s'}}>
           <div className="card-header">
             <h3 className="card-title">Article Engagement</h3>
           </div>

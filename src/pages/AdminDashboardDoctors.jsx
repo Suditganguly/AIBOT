@@ -1,7 +1,7 @@
 import React from 'react';
 
 const AdminDashboardDoctors = ({ doctors, editingDoctor, doctorEdit, setDoctorEdit, startEditDoctor, saveEditDoctor, setEditingDoctor, deleteDoctor, newDoctor, setNewDoctor, addDoctor }) => (
-  <div className="animate-slideInUp">
+  <div className="animate-slideInUp w-full max-w-7xl mx-auto px-2 md:px-6 py-4">
     <h2 className="text-2xl font-bold text-primary mb-6">Doctors</h2>
     <div className="card card-gradient mb-6">
       <div className="card-header">
@@ -104,9 +104,8 @@ const AdminDashboardDoctors = ({ doctors, editingDoctor, doctorEdit, setDoctorEd
         </div>
       </form>
     </div>
-    <div className="card">
-      <div className="overflow-x-auto">
-        <table className="w-full">
+    <div className="card overflow-x-auto">
+      <table className="w-full min-w-[600px] responsive-table">
           <thead>
             <tr className="bg-neutral-100">
               <th className="text-left p-4 text-primary font-semibold">Name</th>
@@ -119,7 +118,7 @@ const AdminDashboardDoctors = ({ doctors, editingDoctor, doctorEdit, setDoctorEd
           <tbody>
             {doctors.map(doc => (
               <tr key={doc.id} className="border-b border-neutral-200 hover:bg-neutral-50">
-                <td className="p-4">
+                <td className="p-4" data-label="Name">
                   {editingDoctor === doc.id ? (
                     <input 
                       value={doctorEdit.name} 
@@ -128,7 +127,7 @@ const AdminDashboardDoctors = ({ doctors, editingDoctor, doctorEdit, setDoctorEd
                     />
                   ) : doc.name}
                 </td>
-                <td className="p-4">
+                <td className="p-4" data-label="Specialty">
                   {editingDoctor === doc.id ? (
                     <input 
                       value={doctorEdit.specialty} 
@@ -137,7 +136,7 @@ const AdminDashboardDoctors = ({ doctors, editingDoctor, doctorEdit, setDoctorEd
                     />
                   ) : doc.specialty}
                 </td>
-                <td className="p-4">
+                <td className="p-4" data-label="Location">
                   {editingDoctor === doc.id ? (
                     <input 
                       value={doctorEdit.location} 
@@ -146,7 +145,7 @@ const AdminDashboardDoctors = ({ doctors, editingDoctor, doctorEdit, setDoctorEd
                     />
                   ) : doc.location}
                 </td>
-                <td className="p-4">
+                <td className="p-4" data-label="Rating">
                   {editingDoctor === doc.id ? (
                     <input 
                       value={doctorEdit.rating} 
@@ -161,7 +160,7 @@ const AdminDashboardDoctors = ({ doctors, editingDoctor, doctorEdit, setDoctorEd
                     <span className="badge badge-primary">{doc.rating.toFixed(1)} ★</span>
                   )}
                 </td>
-                <td className="p-4">
+                <td className="p-4" data-label="Actions">
                   {editingDoctor === doc.id ? (
                     <div className="flex gap-2">
                       <button onClick={() => saveEditDoctor(doc.id)} className="btn btn-primary">Save</button>
@@ -178,7 +177,6 @@ const AdminDashboardDoctors = ({ doctors, editingDoctor, doctorEdit, setDoctorEd
             ))}
           </tbody>
         </table>
-      </div>
     </div>
   </div>
 );

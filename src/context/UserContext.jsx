@@ -230,7 +230,21 @@ export const UserProvider = ({ children }) => {
       { time: 'Yesterday 22:30', desc: 'Completed: Sleep 7.5 hours', type: 'goal' },
       { time: 'Yesterday 20:00', desc: 'Missed: Blood Pressure Med', type: 'missed' },
       { time: 'Yesterday 18:00', desc: 'Completed workout: 45 minutes', type: 'exercise' },
-    ]
+    ],
+    // Filter vitals to show only the most recent for each name
+    filteredVitals: (() => {
+      const vitalsByName = {};
+      for (const vital of userData.vitals) {
+        // Use updatedAt if present, otherwise createdAt
+        const vitalTime = (vital.updatedAt?.toDate?.() ? vital.updatedAt.toDate() : vital.updatedAt) || (vital.createdAt?.toDate?.() ? vital.createdAt.toDate() : vital.createdAt) || new Date(0);
+        const prev = vitalsByName[vital.name];
+        const prevTime = prev ? ((prev.updatedAt?.toDate?.() ? prev.updatedAt.toDate() : prev.updatedAt) || (prev.createdAt?.toDate?.() ? prev.createdAt.toDate() : prev.createdAt) || new Date(0)) : new Date(0);
+        if (!prev || vitalTime > prevTime) {
+          vitalsByName[vital.name] = vital;
+        }
+      }
+      return Object.values(vitalsByName);
+    })()
   };
 
   // Load all user data from database
@@ -325,12 +339,12 @@ export const UserProvider = ({ children }) => {
     try {
       const vital = userData.vitals[index];
       if (!vital?.id || !userData.profile?.email) return;
-      
-      await updateVitalDB(vital.id, { value });
+      // Use the returned full vital object from updateVitalDB
+      const updatedVital = await updateVitalDB(vital.id, { value });
       setUserData(prev => ({
         ...prev,
         vitals: prev.vitals.map((v, i) => 
-          i === index ? { ...v, value } : v
+          i === index ? updatedVital : v
         )
       }));
     } catch (error) {

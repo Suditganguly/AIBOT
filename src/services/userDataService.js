@@ -71,6 +71,8 @@ export const getUserProfile = async (email) => {
           sleepHours: '',
           waterIntake: ''
         },
+        hasDefaultVitals: false, // Prevent duplicate default vitals
+        hasDefaultGoals: false,  // Prevent duplicate default goals
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
@@ -110,6 +112,12 @@ export const updateUserProfile = async (email, updates) => {
 // Get user vitals
 export const getUserVitals = async (email) => {
   try {
+    const userRef = doc(db, USERS_COLLECTION, email);
+    const userSnap = await getDoc(userRef);
+    let hasDefaultVitals = false;
+    if (userSnap.exists()) {
+      hasDefaultVitals = userSnap.data().hasDefaultVitals;
+    }
     const q = query(
       collection(db, VITALS_COLLECTION),
       where('userEmail', '==', email)
@@ -132,20 +140,20 @@ export const getUserVitals = async (email) => {
       return bTime - aTime;
     });
     
-    // Return default vitals if none exist
-    if (vitals.length === 0) {
+    // Return default vitals if none exist and not already created
+    if (vitals.length === 0 && !hasDefaultVitals) {
       const defaultVitals = [
         { name: 'Heart Rate', value: 72, unit: 'bpm', status: 'normal', icon: '💓' },
         { name: 'Blood Pressure', value: '120/80', unit: 'mmHg', status: 'normal', icon: '🩸' },
         { name: 'Temperature', value: 98.6, unit: '°F', status: 'normal', icon: '🌡️' },
         { name: 'Weight', value: 70, unit: 'kg', status: 'stable', icon: '⚖️' },
       ];
-      
       // Create default vitals for the user
       for (const vital of defaultVitals) {
         await addVital(email, vital);
       }
-      
+      // Set the flag in the user profile
+      await updateUserProfile(email, { hasDefaultVitals: true });
       return defaultVitals.map((vital, index) => ({
         id: `default-${index}`,
         userEmail: email,
@@ -153,7 +161,6 @@ export const getUserVitals = async (email) => {
         createdAt: serverTimestamp()
       }));
     }
-    
     return vitals;
   } catch (error) {
     console.error('Error getting user vitals:', error);
@@ -171,10 +178,9 @@ export const addVital = async (email, vitalData) => {
     };
     
     const docRef = await addDoc(collection(db, VITALS_COLLECTION), vitalWithMetadata);
-    return {
-      id: docRef.id,
-      ...vitalData
-    };
+    // Fetch the full vital object from Firestore
+    const vitalSnap = await getDoc(docRef);
+    return vitalSnap.exists() ? { id: docRef.id, ...vitalSnap.data() } : { id: docRef.id, ...vitalData };
   } catch (error) {
     console.error('Error adding vital:', error);
     throw error;
@@ -189,7 +195,9 @@ export const updateVital = async (vitalId, updates) => {
       ...updates,
       updatedAt: serverTimestamp()
     });
-    return { id: vitalId, ...updates };
+    // Fetch the full vital object from Firestore
+    const vitalSnap = await getDoc(vitalRef);
+    return vitalSnap.exists() ? { id: vitalId, ...vitalSnap.data() } : { id: vitalId, ...updates };
   } catch (error) {
     console.error('Error updating vital:', error);
     throw error;
@@ -199,6 +207,12 @@ export const updateVital = async (vitalId, updates) => {
 // Get user goals
 export const getUserGoals = async (email) => {
   try {
+    const userRef = doc(db, USERS_COLLECTION, email);
+    const userSnap = await getDoc(userRef);
+    let hasDefaultGoals = false;
+    if (userSnap.exists()) {
+      hasDefaultGoals = userSnap.data().hasDefaultGoals;
+    }
     const q = query(
       collection(db, GOALS_COLLECTION),
       where('userEmail', '==', email)
@@ -220,9 +234,8 @@ export const getUserGoals = async (email) => {
       const bTime = b.createdAt?.toDate?.() || b.createdAt || new Date(0);
       return bTime - aTime;
     });
-    
-    // Return default goals if none exist
-    if (goals.length === 0) {
+    // Return default goals if none exist and not already created
+    if (goals.length === 0 && !hasDefaultGoals) {
       const defaultGoals = [
         { text: 'Walk 10,000 steps', done: false, progress: 0, target: 10000 },
         { text: 'Drink 8 glasses of water', done: false, progress: 0, target: 8 },
@@ -230,12 +243,12 @@ export const getUserGoals = async (email) => {
         { text: 'Meditate for 15 minutes', done: false, progress: 0, target: 15 },
         { text: 'Eat 5 servings of fruits/vegetables', done: false, progress: 0, target: 5 },
       ];
-      
       // Create default goals for the user
       for (const goal of defaultGoals) {
         await addGoal(email, goal);
       }
-      
+      // Set the flag in the user profile
+      await updateUserProfile(email, { hasDefaultGoals: true });
       return defaultGoals.map((goal, index) => ({
         id: `default-${index}`,
         userEmail: email,
@@ -243,7 +256,6 @@ export const getUserGoals = async (email) => {
         createdAt: serverTimestamp()
       }));
     }
-    
     return goals;
   } catch (error) {
     console.error('Error getting user goals:', error);

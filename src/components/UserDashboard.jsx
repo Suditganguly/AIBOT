@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
+import './UserDashboard.css';
 
 const UserDashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -123,7 +124,7 @@ const UserDashboard = () => {
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 md:p-6">
-      {/* Header */}
+      {/* Welcome and stats below layout header */}
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
           <div className="flex items-center gap-3 mb-1">
@@ -164,7 +165,7 @@ const UserDashboard = () => {
       </div>
 
       {/* Summary Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 user-dashboard-cards">
         <div className="card card-stat p-3 flex flex-col items-center">
           <div className="text-sm font-semibold">BMI</div>
           <div className="text-xl font-bold">{getBMI()}</div>
@@ -188,7 +189,7 @@ const UserDashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-6 user-dashboard-main-grid">
         {/* Vital Signs */}
         <div className="w-full h-full">
           <div className="card h-full" style={{background: 'linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%)', border: '1px solid #bfdbfe', minHeight: CARD_MIN_HEIGHT, padding: '20px'}}>
@@ -203,7 +204,7 @@ const UserDashboard = () => {
               </button>
             </div>
             <div
-              className="grid"
+              className="grid vitals-grid"
               style={{
                 gridTemplateColumns: '1fr 1fr',
                 gridTemplateRows: '1fr 1fr',
@@ -212,7 +213,7 @@ const UserDashboard = () => {
                 minWidth: '260px'
               }}
             >
-              {userData.vitals.map((vital, index) => (
+              {derivedData.filteredVitals.map((vital, index) => (
                 <div
                   key={index}
                   className="flex flex-col items-center justify-center rounded-xl shadow-md p-4 min-h-[110px]"

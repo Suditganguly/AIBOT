@@ -1,0 +1,56 @@
+/* UserDashboard.css */
+
+/* Default (desktop/laptop) styles: no changes needed, use existing classes */
+
+/* Responsive styles for mobile */
+@media (max-width: 768px) {
+  .user-dashboard-main-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .user-dashboard-cards {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .card, .glass-card {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px !important;
+    font-size: 15px !important;
+  }
+  .card-header, .card-title {
+    font-size: 1.1rem !important;
+    padding-bottom: 6px !important;
+  }
+  .vitals-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+  }
+  .vitals-grid > div {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .input, .input-xs, .input-dark {
+    font-size: 1rem !important;
+    padding: 8px 10px !important;
+  }
+  .btn, .btn-outline, .btn-xs {
+    font-size: 1rem !important;
+    padding: 8px 14px !important;
+    min-height: 36px !important;
+  }
+  .checkbox {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  .user-dashboard-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+} 
