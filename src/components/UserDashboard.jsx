@@ -178,13 +178,13 @@ const UserDashboard = () => {
         </div>
         <div className="card card-stat p-3 flex flex-col items-center">
           <div className="text-sm font-semibold">Goals Completed</div>
-          <div className="text-xl font-bold">{userAnalytics.goals.completed}/{userAnalytics.goals.total}</div>
-          <div className="text-xs text-neutral-500">{userAnalytics.goals.completionRate}% success rate</div>
+          <div className="text-xl font-bold">{userData.goals.filter(g => g.done).length}/{userData.goals.length}</div>
+          <div className="text-xs text-neutral-500">{userData.goals.length > 0 ? Math.round(userData.goals.filter(g => g.done).length / userData.goals.length * 100) : 0}% success rate</div>
         </div>
         <div className="card card-stat p-3 flex flex-col items-center">
           <div className="text-sm font-semibold">Med Adherence</div>
-          <div className="text-xl font-bold">{userAnalytics.medications.taken}/{userAnalytics.medications.total}</div>
-          <div className="text-xs text-neutral-500">{userAnalytics.medications.adherence}% taken</div>
+          <div className="text-xl font-bold">{userData.reminders.filter(r => r.taken).length}/{userData.reminders.length}</div>
+          <div className="text-xs text-neutral-500">{userData.reminders.length > 0 ? Math.round(userData.reminders.filter(r => r.taken).length / userData.reminders.length * 100) : 0}% taken</div>
         </div>
       </div>
 

@@ -151,7 +151,7 @@ const HealthJournal = () => {
 
   return (
     <div className="w-full flex justify-center items-start p-4 md:p-8">
-      <div className="card card-gradient w-full max-w-6xl mt-8 p-4 md:p-8">
+      <div className="card card-gradient w-full max-w-6xl mt-8 p-4 md:p-8 health-journal-mobile-card">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <h2 className="text-primary text-2xl md:text-3xl font-bold mb-4 md:mb-0">Health Journal</h2>
           <div className="flex items-center gap-4">

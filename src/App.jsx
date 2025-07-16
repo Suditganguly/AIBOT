@@ -16,6 +16,7 @@ import Register from './components/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import UserProfileDropdown from './components/UserProfileDropdown';
 import Header from './components/Header';
+import LandingPage from './components/LandingPage';
 
 const navLinks = [
   { to: '/', label: 'Dashboard' },
@@ -125,10 +126,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Root route - redirect based on auth state */}
+        {/* Root route - show landing page if not authenticated, else redirect */}
         <Route path="/" element={
           authChecked ? (
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/register" replace />
+            isAuthenticated ? <Navigate to="/dashboard" replace /> : <LandingPage />
           ) : (
             <div className="min-h-screen flex items-center justify-center bg-gradient-modern">
               <div className="text-center">
