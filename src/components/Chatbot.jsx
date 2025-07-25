@@ -83,9 +83,9 @@ const Chatbot = () => {
         setLoading(false);
       }, 500);
     } else {
-      // Call backend Gemini chatbot proxy
+      // Call backend LLaMA chatbot proxy
       try {
-        const res = await fetch('http://localhost:5000/api/gemini', {
+        const res = await fetch('http://localhost:5000/api/chatbot', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: userInput })
