@@ -105,6 +105,21 @@
   }
 }
 
+@media (min-width: 768px) {
+  .btn,
+  .btn-outline,
+  .btn-xs,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .bg-error,
+  .admin-dashboard-main-grid button,
+  .admin-dashboard-cards button {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
 .blur-overlay {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);

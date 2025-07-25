@@ -17,9 +17,11 @@ import ProtectedRoute from './components/ProtectedRoute';
 import UserProfileDropdown from './components/UserProfileDropdown';
 import Header from './components/Header';
 import LandingPage from './components/LandingPage';
+import MedicalHistory from './pages/MedicalHistory';
 
 const navLinks = [
-  { to: '/', label: 'Dashboard' },
+  { to: '/', label: 'Home', isHome: true },
+  { to: '/dashboard', label: 'Dashboard' },
   { to: '/chatbot', label: 'AI Chatbot' },
   { to: '/tips', label: 'Health Tips & Goals' },
   { to: '/reminder', label: 'Medicine Reminder' },
@@ -28,6 +30,7 @@ const navLinks = [
   { to: '/doctors', label: 'Doctor Finder' },
   { to: '/analytics', label: 'Analytics' },
   { to: '/profile', label: 'Profile Settings' },
+  { to: '/medical-history', label: 'Medical History' },
   { to: '/admin', label: 'Admin Dashboard', admin: true },
 ];
 
@@ -126,10 +129,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Root route - show landing page if not authenticated, else redirect */}
+        {/* Root route - always show landing page */}
         <Route path="/" element={
           authChecked ? (
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <LandingPage />
+            <LandingPage />
           ) : (
             <div className="min-h-screen flex items-center justify-center bg-gradient-modern">
               <div className="text-center">
@@ -161,6 +164,7 @@ function App() {
           <Route path="/doctors" element={<DoctorFinder />} />
           <Route path="/analytics" element={<AnalyticsDashboard />} />
           <Route path="/profile" element={<ProfileSettings />} />
+          <Route path="/medical-history" element={<MedicalHistory />} />
         </Route>
         
         {/* Admin route - also protected */}

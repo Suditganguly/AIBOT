@@ -63,6 +63,22 @@ const Register = () => {
     <div className="auth-page register-container">
       <div className="auth-bg-blur"></div>
       <div className="auth-card">
+        <div style={{ marginBottom: '1rem', textAlign: 'left' }}>
+          <Link
+            to="/"
+            style={{
+              color: '#2563eb',
+              textDecoration: 'none',
+              fontWeight: 500,
+              fontSize: '1rem',
+              display: 'inline-block',
+              transition: 'text-decoration 0.2s',
+            }}
+            className="back-to-home-link"
+          >
+            <span style={{ fontSize: '1.1em', marginRight: '0.4em', verticalAlign: 'middle' }}>←</span> Back to Home
+          </Link>
+        </div>
         <div className="text-center mb-8">
           <div className="mx-auto h-14 w-14 flex items-center justify-center rounded-full bg-primary shadow-neumorph text-white text-3xl font-bold mb-4 backdrop-blur-md">
             <span role="img" aria-label="register">📝</span>

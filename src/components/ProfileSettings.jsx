@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useUser } from '../context/UserContext';
+import PDFUpload from './PDFUpload';
 
 const ProfileSettings = () => {
   const { userData, updateProfile, updateProfileSection } = useUser();
@@ -340,6 +341,9 @@ const ProfileSettings = () => {
                 placeholder="Describe your medical history, surgeries, etc."
               />
             </div>
+
+            {/* PDF Upload Component */}
+            <PDFUpload />
           </div>
         )}
 

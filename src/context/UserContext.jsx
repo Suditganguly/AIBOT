@@ -1066,6 +1066,8 @@ export const UserProvider = ({ children }) => {
       await auth.signOut();
       setIsAuthenticated(false);
       setUserData(initialData);
+      // Redirect to landing page after logout
+      window.location.href = '/';
     } catch (error) {
       console.error('Error during logout:', error);
     }

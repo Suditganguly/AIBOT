@@ -189,7 +189,8 @@ const UserDashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-6 user-dashboard-main-grid">
+      <div className="user-dashboard-main-grid">
+        <div className="dashboard-six-boxes-grid">
         {/* Vital Signs */}
         <div className="w-full h-full">
           <div className="card h-full" style={{background: 'linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%)', border: '1px solid #bfdbfe', minHeight: CARD_MIN_HEIGHT, padding: '20px'}}>
@@ -376,6 +377,7 @@ const UserDashboard = () => {
               )}
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

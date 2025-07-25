@@ -53,4 +53,34 @@
     align-items: flex-start !important;
     gap: 8px !important;
   }
+}
+
+@media (min-width: 768px) {
+  .user-dashboard-main-grid button,
+  .user-dashboard-cards button,
+  .btn,
+  .btn-outline,
+  .btn-xs {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+} 
+
+/* Layout for the six main boxes on User Dashboard */
+.dashboard-six-boxes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem; /* 20px, matches gap-4 */
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .dashboard-six-boxes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  .dashboard-six-boxes-grid > div {
+    min-width: 0;
+  }
 } 

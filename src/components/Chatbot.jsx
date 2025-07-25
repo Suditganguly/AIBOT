@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+// Remove Gemini SDK import
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
@@ -61,7 +62,7 @@ const Chatbot = () => {
       }
     }
     lastFollowUp = null;
-    return "Sorry, I don't have an answer for that yet. Try asking about medicines, water, or doctors!";
+    return null; // No match, use Gemini
   }
 
   useEffect(() => {
@@ -74,11 +75,45 @@ const Chatbot = () => {
     setMessages([...messages, { sender: 'user', text: input }]);
     setInput('');
     setLoading(true);
-    setTimeout(() => {
-      const botResponse = getAdvancedBotResponse(input);
-      setMessages(msgs => [...msgs, { sender: 'bot', text: botResponse }]);
-    setLoading(false);
-    }, 500); // Simulate a short delay for realism
+    const userInput = input;
+    const botResponse = getAdvancedBotResponse(userInput);
+    if (botResponse !== null) {
+      setTimeout(() => {
+        setMessages(msgs => [...msgs, { sender: 'bot', text: botResponse }]);
+        setLoading(false);
+      }, 500);
+    } else {
+      // Call backend Gemini proxy
+      try {
+        const res = await fetch('http://localhost:5000/api/gemini', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: userInput })
+        });
+        if (res.status === 429) {
+          setMessages(msgs => [
+            ...msgs,
+            {
+              sender: 'bot',
+              text: 'Sorry, the AI assistant has reached its usage limit for now. This is a quota limit from Google Gemini. Please try again later, or see how to increase your quota at https://ai.google.dev/gemini-api/docs/rate-limits. If you need more usage, enable billing in your Google Cloud project.'
+            }
+          ]);
+        } else {
+          const data = await res.json();
+          let text = "Sorry, I couldn't get an answer from Gemini AI.";
+          if (data && data.text) {
+            text = data.text;
+          } else if (data.error) {
+            text = `Gemini API error: ${data.error}`;
+          }
+          setMessages(msgs => [...msgs, { sender: 'bot', text }]);
+        }
+      } catch (err) {
+        setMessages(msgs => [...msgs, { sender: 'bot', text: "Sorry, I couldn't get an answer from Gemini AI." }]);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   return (
