@@ -83,7 +83,7 @@ const Chatbot = () => {
         setLoading(false);
       }, 500);
     } else {
-      // Call backend Gemini proxy
+      // Call backend Gemini chatbot proxy
       try {
         const res = await fetch('http://localhost:5000/api/gemini', {
           method: 'POST',
@@ -95,21 +95,21 @@ const Chatbot = () => {
             ...msgs,
             {
               sender: 'bot',
-              text: 'Sorry, the AI assistant has reached its usage limit for now. This is a quota limit from Google Gemini. Please try again later, or see how to increase your quota at https://ai.google.dev/gemini-api/docs/rate-limits. If you need more usage, enable billing in your Google Cloud project.'
+              text: 'Sorry, the AI assistant has reached its usage limit for now. This is a quota limit from the LLaMA API. Please try again later, or check your API usage and limits.'
             }
           ]);
         } else {
           const data = await res.json();
-          let text = "Sorry, I couldn't get an answer from Gemini AI.";
+          let text = "Sorry, I couldn't get an answer from the AI assistant.";
           if (data && data.text) {
             text = data.text;
           } else if (data.error) {
-            text = `Gemini API error: ${data.error}`;
+            text = `LLaMA API error: ${data.error}`;
           }
           setMessages(msgs => [...msgs, { sender: 'bot', text }]);
         }
       } catch (err) {
-        setMessages(msgs => [...msgs, { sender: 'bot', text: "Sorry, I couldn't get an answer from Gemini AI." }]);
+        setMessages(msgs => [...msgs, { sender: 'bot', text: "Sorry, I couldn't get an answer from the AI assistant." }]);
       } finally {
         setLoading(false);
       }
