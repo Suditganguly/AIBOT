@@ -113,12 +113,8 @@ const UserDashboard = () => {
   // Use centralized health insights
   const healthInsights = userAnalytics.insights;
 
-  // Filter for upcoming (future) appointments
-  const now = new Date();
-  const upcomingAppointments = userData.appointments.filter(apt => {
-    const aptDate = new Date(apt.date + 'T' + (apt.time || '00:00'));
-    return aptDate >= now && apt.status !== 'cancelled';
-  });
+  // Show all appointments without filtering
+  const upcomingAppointments = userData.appointments;
 
   const CARD_MIN_HEIGHT = '320px'; // You can adjust this value for your preferred height
 
