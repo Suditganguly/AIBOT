@@ -1,56 +1,55 @@
 import React, { useState, useRef } from 'react';
 import { FaFilePdf, FaFileImage, FaUpload, FaTimes, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { useUser } from '../context/UserContext';
 
-const API_URL = 'http://localhost:5000/api/upload-files';
+const API_URL = 'http://localhost:5000/api/process-document';
 
 const isImage = (file) => file.type.startsWith('image/');
 const isPDF = (file) => file.type === 'application/pdf';
 
-// Helper to format extracted text
-function formatExtractedText(text) {
-  if (!text) return <span className="text-neutral-400">No text extracted.</span>;
-  // Split into paragraphs by double newlines or line breaks
-  const paragraphs = text.split(/\n\s*\n|\r\n\s*\r\n/).filter(Boolean);
-  return paragraphs.map((para, idx) => {
-    // If looks like a list (lines start with dash, number, or bullet)
-    const lines = para.split(/\n|\r\n/).filter(Boolean);
-    const isList = lines.length > 1 && lines.every(line => /^[-•\d]/.test(line.trim()));
-    if (isList) {
-      return (
-        <ul key={idx} className="list-disc pl-6 mb-2">
-          {lines.map((line, i) => <li key={i}>{line.replace(/^[-•\d.\s]+/, '')}</li>)}
-        </ul>
-      );
-    }
-    return <p key={idx} className="mb-2 whitespace-pre-line">{para.trim()}</p>;
-  });
-}
-
-function extractMedicalInfo(text) {
-  const norm = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-  const doctor = norm.match(/(?:Dr\.?|Vd\.?|Hakim)\s+[A-Za-z .()]+/i)?.[0]?.trim() || '';
-  const qualification = norm.match(/Qualification[:\-]?\s*([A-Za-z0-9.,() ]+)/i)?.[1]?.trim() || '';
-  const regNo = norm.match(/Registration No\.?[:\-]?\s*([A-Za-z0-9\/-]+)/i)?.[1]?.trim() || '';
-  const patient = norm.match(/patient\s*Full Name\s*([A-Za-z .]+)/i)?.[1]?.trim() || '';
-  const sex = norm.match(/Sex[:\-]?\s*([A-Za-z]+)/i)?.[1]?.trim() || '';
-  const age = norm.match(/Age[:\-]?\s*(\d{1,3})/i)?.[1]?.trim() || '';
-  let medicines = [];
-  const rxIndex = norm.search(/\bRx\b/i);
-  if (rxIndex !== -1) {
-    const afterRx = norm.slice(rxIndex + 2).split('\n').map(l => l.trim()).filter(Boolean);
-    medicines = afterRx.slice(0, 5).filter(line => line.length > 2);
+const StructuredDataCard = ({ data }) => {
+  if (!data || Object.keys(data).length === 0) {
+    return <p className="text-neutral-500">No structured data could be extracted.</p>;
   }
-  const date = norm.match(/Date(?: of dispensing)?[:\-]?\s*([\d\/\-]+)/i)?.[1]?.trim() || '';
-  const signature = norm.match(/signature(?: with date and seal)?/i)?.[0] ? 'Present' : '';
-  return { doctor, qualification, regNo, patient, sex, age, medicines, date, signature };
-}
+
+  return (
+    <div className="text-sm space-y-2">
+      {data.patientName && <div><span className="font-bold">Patient:</span> {data.patientName}</div>}
+      {data.date && <div><span className="font-bold">Date:</span> {data.date}</div>}
+      {data.diagnosis && (
+        <div>
+          <span className="font-bold">Diagnosis:</span>{' '}
+          {/* Make rendering robust: handle both string and object for diagnosis */}
+          {typeof data.diagnosis === 'object' && data.diagnosis !== null
+            ? [data.diagnosis.condition, data.diagnosis.description].filter(Boolean).join(' - ') || 'N/A'
+            : data.diagnosis || 'N/A'}
+        </div>
+      )}
+      {data.prescribedMedicines && data.prescribedMedicines.length > 0 && (
+        <div>
+          <span className="font-bold">Medicines:</span>
+          <ul className="list-disc pl-6 mt-1">
+            {data.prescribedMedicines.map((med, i) => (
+              <li key={i}>
+                {med.name || 'Unknown Medicine'}
+                {med.dosage && ` - ${med.dosage}`}
+                {med.frequency && ` (${med.frequency})`}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {data.followUpInstructions && <div><span className="font-bold">Follow-up:</span> {data.followUpInstructions}</div>}
+    </div>
+  );
+};
 
 const PDFUpload = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [results, setResults] = useState([]);
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
+  const { userData } = useUser();
   const dropRef = useRef();
 
   const handleFiles = (files) => {
@@ -95,21 +94,24 @@ const PDFUpload = () => {
       setError('Please select at least one PDF or image file.');
       return;
     }
+    if (!userData || !userData.profile.email) {
+      setError('You must be logged in to upload documents.');
+      return;
+    }
     setUploading(true);
     setStatus('');
     setError('');
-    setResults([]);
     const formData = new FormData();
     selectedFiles.forEach(f => formData.append('files', f));
+    formData.append('userEmail', userData.profile.email);
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
         body: formData
       });
       const data = await res.json();
-      if (data.success) {
-        setResults(data.results);
-        setStatus('Upload complete!');
+      if (res.ok && data.success) {
+        setStatus('Processing complete! You can view the results on your Medical History page.');
         setSelectedFiles([]);
       } else {
         setError(data.message || 'Upload failed.');
@@ -197,35 +199,6 @@ const PDFUpload = () => {
           <span className="flex items-center gap-2"><FaUpload /> Upload</span>
         )}
       </button>
-      {/* Results */}
-      {results.length > 0 && (
-        <div className="mt-6 space-y-4">
-          <h4 className="font-semibold text-primary mb-2">Extracted Medical Info</h4>
-          {results.map((res, idx) => {
-            const info = extractMedicalInfo(res.text || '');
-            return (
-              <div key={idx} className="p-4 rounded-lg shadow border bg-white max-w-md mx-auto mb-4">
-                <div className="mb-2"><span className="font-bold">Doctor:</span> {info.doctor || <span className="text-neutral-400">Not found</span>}</div>
-                <div className="mb-2"><span className="font-bold">Qualification:</span> {info.qualification || <span className="text-neutral-400">Not found</span>}</div>
-                <div className="mb-2"><span className="font-bold">Reg. No.:</span> {info.regNo || <span className="text-neutral-400">Not found</span>}</div>
-                <div className="mb-2"><span className="font-bold">Patient:</span> {info.patient || <span className="text-neutral-400">Not found</span>}</div>
-                <div className="mb-2"><span className="font-bold">Sex:</span> {info.sex || <span className="text-neutral-400">Not found</span>}</div>
-                <div className="mb-2"><span className="font-bold">Age:</span> {info.age || <span className="text-neutral-400">Not found</span>}</div>
-                <div className="mb-2">
-                  <span className="font-bold">Medicines:</span>
-                  {info.medicines.length > 0 ? (
-                    <ul className="list-disc pl-6">{info.medicines.map((med, i) => <li key={i}>{med}</li>)}</ul>
-                  ) : (
-                    <span className="text-neutral-400 ml-2">Not found</span>
-                  )}
-                </div>
-                <div className="mb-2"><span className="font-bold">Date:</span> {info.date || <span className="text-neutral-400">Not found</span>}</div>
-                <div className="mb-2"><span className="font-bold">Signature:</span> {info.signature || <span className="text-neutral-400">Not found</span>}</div>
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 };

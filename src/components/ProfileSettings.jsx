@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import PDFUpload from './PDFUpload';
 
@@ -14,6 +15,7 @@ const ProfileSettings = () => {
   const [newMedication, setNewMedication] = useState('');
 
   const handleInputChange = async (section, field, value) => {
+    // This function remains the same
     try {
     if (section) {
         await updateProfileSection(section, { [field]: value });
@@ -32,6 +34,7 @@ const ProfileSettings = () => {
   };
 
   const addToArray = async (field, value, setter) => {
+    // This function remains the same
     if (value.trim()) {
       try {
       const currentArray = userData.profile[field] || [];
@@ -44,6 +47,7 @@ const ProfileSettings = () => {
   };
 
   const removeFromArray = async (field, index) => {
+    // This function remains the same
     try {
     const currentArray = userData.profile[field] || [];
       await updateProfile({ [field]: currentArray.filter((_, i) => i !== index) });
@@ -56,7 +60,7 @@ const ProfileSettings = () => {
     const heightInM = userData.profile.height / 100;
     return (userData.profile.weight / (heightInM * heightInM)).toFixed(1);
   };
-
+  
   const getBMICategory = (bmi) => {
     if (bmi < 18.5) return { category: 'Underweight', color: 'text-blue-600' };
     if (bmi < 25) return { category: 'Normal', color: 'text-green-600' };
@@ -342,8 +346,15 @@ const ProfileSettings = () => {
               />
             </div>
 
-            {/* PDF Upload Component */}
-            <PDFUpload />
+            <div className="card card-alt p-4">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-lg font-semibold text-primary">Upload Medical Documents</h3>
+                <Link to="/history" className="btn btn-outline btn-sm">
+                  View Full History
+                </Link>
+              </div>
+              <PDFUpload />
+            </div>
           </div>
         )}
 
