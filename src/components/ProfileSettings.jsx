@@ -349,7 +349,7 @@ const ProfileSettings = () => {
             <div className="card card-alt p-4">
               <div className="flex justify-between items-center mb-3">
                 <h3 className="text-lg font-semibold text-primary">Upload Medical Documents</h3>
-                <Link to="/history" className="btn btn-outline btn-sm">
+                <Link to="/medical-history" className="btn btn-outline btn-sm">
                   View Full History
                 </Link>
               </div>

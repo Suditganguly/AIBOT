@@ -749,6 +749,37 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  // Medical History Management
+  const loadMedicalHistory = async (email) => {
+    if (!email) return;
+
+    // Access environment variables using import.meta.env for Vite-based projects.
+    // This prevents the "process is not defined" error in the browser.
+    // Ensure your .env file has VITE_API_URL=http://localhost:5000
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+    try {
+      const response = await fetch(`${API_URL}/api/documents/user/${encodeURIComponent(email)}`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to fetch medical history: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Update the global user state with the fetched documents array.
+      setUserData(prevData => ({
+        ...prevData,
+        medicalHistory: data.documents || [],
+      }));
+    } catch (error) {
+      console.error("Error in loadMedicalHistory:", error);
+      // Set an empty array on error to prevent UI crashes
+      setUserData(prevData => ({ ...prevData, medicalHistory: [] }));
+    }
+  };
+
   // System users management (for admin)
   const addSystemUser = (user) => {
     const newUser = {
@@ -1257,6 +1288,7 @@ export const UserProvider = ({ children }) => {
     deleteAppointment,
     loadUserAppointments,
     loadUserData,
+    loadMedicalHistory,
     loadAllUsers,
     loadAllArticles,
     loadPublishedArticles,

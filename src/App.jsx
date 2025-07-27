@@ -16,8 +16,8 @@ import Register from './components/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import UserProfileDropdown from './components/UserProfileDropdown';
 import Header from './components/Header';
-import LandingPage from './components/LandingPage';
-import MedicalHistory from './pages/MedicalHistory';
+import LandingPage from './components/LandingPage'; 
+import MedicalHistory from './components/MedicalHistory';
 
 const navLinks = [
   { to: '/', label: 'Home', isHome: true },

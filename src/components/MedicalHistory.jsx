@@ -1,138 +1,180 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import { FaFileMedicalAlt, FaSpinner, FaExclamationCircle, FaCalendarAlt } from 'react-icons/fa';
-
-// A robust card for displaying structured medical data
-const StructuredDataCard = ({ data }) => {
-  if (!data || Object.keys(data).length === 0) {
-    return <p className="text-neutral-500 text-sm">No structured data could be extracted.</p>;
-  }
-
-  return (
-    <div className="text-sm space-y-2">
-      {data.patientName && <div><span className="font-bold">Patient:</span> {data.patientName}</div>}
-      {data.date && <div><span className="font-bold">Date:</span> {data.date}</div>}
-      {data.diagnosis && (
-        <div>
-          <span className="font-bold">Diagnosis:</span>{' '}
-          {/* Make rendering robust: handle both string and object for diagnosis */}
-          {typeof data.diagnosis === 'object' && data.diagnosis !== null
-            ? [data.diagnosis.condition, data.diagnosis.description].filter(Boolean).join(' - ') || 'N/A'
-            : data.diagnosis || 'N/A'}
-        </div>
-      )}
-      {data.prescribedMedicines && data.prescribedMedicines.length > 0 && (
-        <div>
-          <span className="font-bold">Medicines:</span>
-          <ul className="list-disc pl-6 mt-1">
-            {data.prescribedMedicines.map((med, i) => (
-              <li key={i}>
-                {med.name || 'Unknown Medicine'}
-                {med.dosage && ` - ${med.dosage}`}
-                {med.frequency && ` (${med.frequency})`}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {data.followUpInstructions && <div><span className="font-bold">Follow-up:</span> {data.followUpInstructions}</div>}
-    </div>
-  );
-};
+import { FaFilePdf } from 'react-icons/fa';
 
 const MedicalHistory = () => {
-  const [documents, setDocuments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [selectedDocument, setSelectedDocument] = useState(null); // New state for modal
-  const { userData } = useUser();
+  // NOTE: This assumes a `loadMedicalHistory` function exists in your UserContext
+  // to fetch the documents from your backend.
+  const { userData, loadMedicalHistory } = useUser(); 
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchRecords = async () => {
-      if (!userData?.profile?.email) {
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        setError('');
-        const res = await fetch(`http://localhost:5000/api/documents/user/${userData.profile.email}`);
-        const data = await res.json();
+    const fetchHistory = async () => {
+      // Use optional chaining to safely access nested properties
+      const userEmail = userData.profile?.email;
 
-        if (res.ok && data.success) {
-          console.log('Fetched medical history:', data.documents);
-          setDocuments(data.documents);
-        } else {
-          throw new Error(data.error || 'Failed to fetch medical history.');
+      // This check prevents re-fetching if data is already present
+      if (userEmail && !userData.medicalHistory) {
+        try {
+          await loadMedicalHistory(userEmail);
+        } catch (err) {
+          console.error("Failed to load medical history:", err);
+          setError('Could not load your medical history. Please try again later.');
         }
-      } catch (err) {
-        console.error('Error fetching medical history:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
       }
+      setIsLoading(false);
     };
 
-    fetchRecords();
-  }, [userData.profile.email]); // Dependency on user's email
+    fetchHistory();
+  }, [userData.profile, userData.medicalHistory, loadMedicalHistory]);
 
-  if (loading) {
-    return <div className="flex items-center justify-center p-4 text-neutral-500"><FaSpinner className="animate-spin mr-2" /> Loading history...</div>;
+  // When data is loaded, select the first document by default
+  useEffect(() => {
+    if (userData.medicalHistory && userData.medicalHistory.length > 0) {
+      setSelectedDoc(userData.medicalHistory[0]);
+    }
+  }, [userData.medicalHistory]);
+
+  // Fallback for medical history to prevent errors if it's undefined
+  const medicalHistory = userData.medicalHistory || [];
+
+  if (isLoading) {
+    return <div className="w-full flex justify-center items-center p-8 text-lg">Loading medical history...</div>;
   }
 
   if (error) {
-    return <div className="flex items-center p-4 text-red-600"><FaExclamationCircle className="mr-2" /> Error: {error}</div>;
-  }
-
-  if (documents.length === 0) {
-    return <p className="text-center text-neutral-500 p-4">No medical documents found. Upload a document to see your history.</p>;
+    return <div className="w-full flex justify-center items-center p-8 text-lg text-red-500">{error}</div>;
   }
 
   return (
-    <>
-      <div className="space-y-3">
-        {documents.map(doc => (
-          <div
-            key={doc.id}
-            className="p-3 rounded-lg border bg-neutral-50 hover:bg-blue-50 hover:border-primary cursor-pointer transition-all"
-            onClick={() => setSelectedDocument(doc)} // Set selected doc on click
-          >
-            <div className="flex justify-between items-center">
-              <h5 className="font-semibold text-md text-primary truncate flex items-center gap-2">
-                <FaFileMedicalAlt /> {doc.originalFilename}
-              </h5>
-              <span className="text-xs text-neutral-500 flex items-center gap-1">
-                <FaCalendarAlt />{' '}
-                {doc.createdAt && doc.createdAt._seconds
-                  ? new Date(doc.createdAt._seconds * 1000).toLocaleDateString()
-                  : doc.createdAt
-                  ? new Date(doc.createdAt).toLocaleDateString()
-                  : 'No date'}
-              </span>
-            </div>
+    <div className="w-full flex justify-center items-start p-4 md:p-8">
+      <div className="card card-gradient w-full max-w-7xl mt-8 p-4 md:p-8">
+        <h2 className="mb-6 text-primary text-2xl md:text-3xl font-bold">Medical Document History</h2>
+        
+        {medicalHistory.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-neutral-600 text-lg">You haven't uploaded any medical documents yet.</p>
+            <p className="text-neutral-500 mt-2">Go to your Profile Settings to upload your first document.</p>
           </div>
-        ))}
-      </div>
+        ) : (
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Document List */}
+            <div className="w-full md:w-1/3">
+              <h3 className="text-lg font-semibold mb-4 text-primary">Uploaded Documents</h3>
+              <div className="space-y-3">
+                {medicalHistory.map(doc => (
+                  <button
+                    key={doc.id}
+                    onClick={() => setSelectedDoc(doc)}
+                    className={`w-full text-left p-3 rounded-lg transition-all flex items-center gap-3 ${
+                      selectedDoc?.id === doc.id
+                        ? 'bg-primary text-white shadow-lg'
+                        : 'bg-white hover:bg-blue-50'
+                    }`}
+                  >
+                    <FaFilePdf className="text-2xl flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold">{doc.fileName}</p>
+                      <p className={`text-xs ${selectedDoc?.id === doc.id ? 'text-blue-200' : 'text-neutral-500'}`}>
+                        Uploaded: {doc.uploadDate ? new Date(doc.uploadDate).toLocaleDateString() : 'N/A'}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-      {/* Detail View Modal */}
-      {selectedDocument && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 animate-fadeIn"
-          onClick={() => setSelectedDocument(null)} // Close on overlay click
-        >
-          <div
-            className="card card-gradient max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 animate-slideInUp"
-            onClick={e => e.stopPropagation()} // Prevent closing when clicking inside the card
-          >
-            <div className="flex justify-between items-center border-b pb-3 mb-4">
-              <h3 className="text-xl font-bold text-primary truncate">{selectedDocument.originalFilename}</h3>
-              <button onClick={() => setSelectedDocument(null)} className="text-neutral-500 hover:text-red-500 text-2xl">&times;</button>
+            {/* Document Viewer */}
+            <div className="w-full md:w-2/3">
+              {selectedDoc ? (
+                <div className="card card-alt p-6">
+                  <h3 className="text-xl font-bold mb-4 text-primary">{selectedDoc.fileName}</h3>
+                  <h4 className="font-semibold text-lg mb-2">Medical History Details</h4>
+                  {(() => {
+                    const structuredData = Object.fromEntries(
+                      Object.entries(selectedDoc).filter(
+                        ([key]) => !['id', 'userEmail', 'originalFilename', 'createdAt', 'fileName', 'uploadDate'].includes(key)
+                      )
+                    );
+
+                    const patient = structuredData.patient || {};
+                    const diagnosis = structuredData.diagnosis || [];
+                    const prescribedMedicines = structuredData.prescribed_medicines || [];
+                    const followUpInstructions = structuredData.follow_up_instructions || [];
+
+                    return (
+                      <div className="text-neutral-800 text-base space-y-4">
+                        <div>
+                          <h5 className="font-semibold text-lg mb-1">Patient Information</h5>
+                          <p><strong>Name:</strong> {patient.name || 'N/A'}</p>
+                          <p><strong>Age:</strong> {patient.age || 'N/A'}</p>
+                          <p><strong>Gender:</strong> {patient.gender || 'N/A'}</p>
+                          <p><strong>Date:</strong> {patient.date || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <h5 className="font-semibold text-lg mb-1">Diagnosis</h5>
+                          {diagnosis.length > 0 ? (
+                            <ul className="list-disc list-inside">
+                              {diagnosis.map((item, index) => (
+                                <li key={index}>
+                                  {typeof item === 'object' && item !== null
+                                    ? (item.condition || '') + (item.description ? ': ' + item.description : '')
+                                    : item}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p>N/A</p>
+                          )}
+                        </div>
+                        <div>
+                          <h5 className="font-semibold text-lg mb-1">Prescribed Medicines</h5>
+                          {prescribedMedicines.length > 0 ? (
+                            <ul className="list-disc list-inside">
+                              {prescribedMedicines.map((item, index) => (
+                                <li key={index}>
+                                  {typeof item === 'object' && item !== null
+                                    ? (item.condition || '') + (item.description ? ': ' + item.description : '')
+                                    : item}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p>N/A</p>
+                          )}
+                        </div>
+                        <div>
+                          <h5 className="font-semibold text-lg mb-1">Follow-up Instructions</h5>
+                          {followUpInstructions.length > 0 ? (
+                            <ul className="list-disc list-inside">
+                              {followUpInstructions.map((item, index) => (
+                                <li key={index}>
+                                  {typeof item === 'object' && item !== null
+                                    ? (item.condition || '') + (item.description ? ': ' + item.description : '')
+                                    : item}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p>N/A</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-neutral-500 p-6 card card-alt">
+                  {selectedDoc ? "This document is still being processed or no structured data could be extracted." : "Select a document to view its details."}
+                </div>
+              )}
             </div>
-            <StructuredDataCard data={selectedDocument} />
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </div>
+    </div>
   );
 };
 
